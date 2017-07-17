@@ -5,5 +5,6 @@ require '../src/IpfsApi.php';
 
 use IpfsApi\Ipfs;
 
-echo 'this is working';
 echo Ipfs::version();
+
+echo Ipfs::add('test.txt');
