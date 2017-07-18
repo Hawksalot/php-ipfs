@@ -12,13 +12,14 @@ namespace IpfsApi;
 class Ipfs
 {
     /*
-     * add
+     * adds file to local IPFS node by local filepath
      *
-     * @todo everything
+     * @param string $filePath /path/to/local/file
      */
-    public static function add($fileLocation)
+    public static function addFromPath($filePath)
     {
-        $client = new \GuzzleHttp\Client([
+        // @todo abstract this client away
+	$client = new \GuzzleHttp\Client([
             'base_uri' => 'http://localhost:5001/api/v0/',
             'max' => 5,
             'strict' => false,
@@ -26,38 +27,61 @@ class Ipfs
             'protocols' => ['http', 'https'],
             'track_redirects' => false,
             'expect' => true // not sure if this is necessary, check expect docs note about http 1.1
-        ]);
-        $response = $client->request('POST', 'add', [
+        ]); 
+        // @todo structure this request so it returns successfully
+	$response = $client->request('POST', 'add', [
+	    'debug' => true,
+	    'headers' => [
+		''
+	    ],
             'multipart' => [
-                'path' => realpath($fileLocation)
+                'path' => realpath($filePath)
             ],
-            'debug' => true
+	    'query' => [
+		'stream-channels' => true
+	    ]
         ]);
-        echo $response;
+        echo 'response = ' . $response;
         $output = $response->getBody();
         return $output;
     }
+
     /*
-     * tar add
+     * adds file to local ipfs node by Merkle-Dag hash
+     *
+     * @param string $hash Merkle-Dag hash of target file
      *
      * @todo everything
      */
-    public static function tarAdd($tarLocation)
+    public static function addFromHash($hash)
     {
-        if(file_exists($tarLocation))
-        {
-            return 'file exists';
-        }
-        $client = new \GuzzleHttp\Client(['base_uri' => 'http://localhost:5001/api/v0/']);
-        $response = $client->request('POST', 'tar/add', [
-            'file' => $tarLocation
-        ]);
-        $output = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
-        $body = $response->getBody()->getContents();
+	// @todo abstract this client away
+	$client = new \GuzzleHttp\Client([
+	    'base_uri' => 'http://localhost:5001/api/v0/'
+	]);
+	$response = $client->request('POST', 'add', [
+	    'arg' => $hash
+	]);
+	$output = $response->getBody()->getContents();
+	return $output;
     }
 
     /*
-     * version
+     * adds tar file to local ipfs node from local filepath
+     *
+     * @param string $tarPath /path/to/tar
+     *
+     * @todo everything
+     */
+    public static function tarAdd($tarPath)
+    {
+	//
+    }
+
+    /*
+     * queries local ipfs node for ipfs version
+     *
+     * @return string indicates ipfs version running on queried ipfs node
      */
     public static function version()
     {
