@@ -18,10 +18,22 @@ class Ipfs
      */
     public static function add($fileLocation)
     {
-        $client = new \GuzzleHttp\Client(['base_uri' => 'http://localhost:5001/api/v0/']);
-        $response = $client->request('POST', 'add', [
-           'file' => ['path' => realpath($fileLocation)]
+        $client = new \GuzzleHttp\Client([
+            'base_uri' => 'http://localhost:5001/api/v0/',
+            'max' => 5,
+            'strict' => false,
+            'referer' => false,
+            'protocols' => ['http', 'https'],
+            'track_redirects' => false,
+            'expect' => true // not sure if this is necessary, check expect docs note about http 1.1
         ]);
+        $response = $client->request('POST', 'add', [
+            'multipart' => [
+                'path' => realpath($fileLocation)
+            ],
+            'debug' => true
+        ]);
+        echo $response;
         $output = $response->getBody();
         return $output;
     }
