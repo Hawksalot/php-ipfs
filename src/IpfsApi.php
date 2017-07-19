@@ -19,7 +19,7 @@ class Ipfs
     public static function addFromPath($filePath)
     {
         // @todo abstract this client away
-	$client = new \GuzzleHttp\Client([
+	    $client = new \GuzzleHttp\Client([
             'base_uri' => 'http://localhost:5001/api/v0/',
             'max' => 5,
             'strict' => false,
@@ -29,17 +29,17 @@ class Ipfs
             'expect' => true // not sure if this is necessary, check expect docs note about http 1.1
         ]); 
         // @todo structure this request so it returns successfully
-	$response = $client->request('POST', 'add', [
-	    'debug' => true,
-	    'headers' => [
-		''
-	    ],
+	    $response = $client->request('POST', 'add', [
+	        'debug' => true,
+	        'headers' => [
+		        ''
+	        ],
             'multipart' => [
-                'path' => realpath($filePath)
+                'path' => fopen(realpath($filePath), "r")
             ],
-	    'query' => [
-		'stream-channels' => true
-	    ]
+	        'query' => [
+            'stream-channels' => true
+            ]
         ]);
         echo 'response = ' . $response;
         $output = $response->getBody();
@@ -55,15 +55,15 @@ class Ipfs
      */
     public static function addFromHash($hash)
     {
-	// @todo abstract this client away
-	$client = new \GuzzleHttp\Client([
-	    'base_uri' => 'http://localhost:5001/api/v0/'
-	]);
-	$response = $client->request('POST', 'add', [
-	    'arg' => $hash
-	]);
-	$output = $response->getBody()->getContents();
-	return $output;
+        // @todo abstract this client away
+        $client = new \GuzzleHttp\Client([
+            'base_uri' => 'http://localhost:5001/api/v0/'
+        ]);
+        $response = $client->request('POST', 'add', [
+            'arg' => $hash
+        ]);
+        $output = $response->getBody()->getContents();
+	    return $output;
     }
 
     /*
@@ -75,7 +75,7 @@ class Ipfs
      */
     public static function tarAdd($tarPath)
     {
-	//
+	    //
     }
 
     /*

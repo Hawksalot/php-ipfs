@@ -7,4 +7,4 @@ use IpfsApi\Ipfs;
 
 echo Ipfs::version();
 
-echo Ipfs::add('test.txt');
+echo Ipfs::addFromPath(realpath('test.txt'));
