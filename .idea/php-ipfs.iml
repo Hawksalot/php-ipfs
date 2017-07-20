@@ -19,6 +19,7 @@
           <root url="file://$MODULE_DIR$/vendor/guzzlehttp/promises" />
           <root url="file://$MODULE_DIR$/vendor/guzzlehttp/psr7" />
           <root url="file://$MODULE_DIR$/vendor/psr/http-message" />
+          <root url="file://$APPLICATION_HOME_DIR$" />
           <root url="file:///usr/share/php" />
         </CLASSES>
         <SOURCES>
@@ -27,6 +28,7 @@
           <root url="file://$MODULE_DIR$/vendor/guzzlehttp/promises" />
           <root url="file://$MODULE_DIR$/vendor/guzzlehttp/psr7" />
           <root url="file://$MODULE_DIR$/vendor/psr/http-message" />
+          <root url="file://$APPLICATION_HOME_DIR$" />
           <root url="file:///usr/share/php" />
         </SOURCES>
       </library>
