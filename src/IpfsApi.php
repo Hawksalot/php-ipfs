@@ -4,27 +4,49 @@
  *
  * @package php-ipfs
  */
-namespace IpfsApi;
+namespace PhpIpfs;
 
 /*
  * Ipfs
  */
 use GuzzleHttp\Client;
 
-
 class Ipfs
 {
+    /*
+     * @link https://gist.github.com/liunian/9338301
+     */
+    private static function getHumanReadableBytes($bytes, $precision = 2)
+    {
+        static $units = array('B','kB','MB','GB','TB','PB','EB','ZB','YB');
+        $step = 1024;
+        $i = 0;
+        while (($bytes / $step) > 0.9) {
+            $bytes = $bytes / $step;
+            $i++;
+        }
+        return round($bytes, $precision).$units[$i];
+    }
+
     /*
      * adds file to local IPFS node by absolute path
      *
      * @param string $objectPath /path/to/local/file
      * @param string $objectName
+     * @param boolean $H Hidden. Include files that are hidden. @todo I think this does nothing. check API
+     * @param boolean $n Only-hash. Only chunk and hash - do not write to disk. can be tested by running ipfs pin ls (I think)
+     * @param boolean $p Progress. Stream progress data. @todo not sure what this does, if anything. find out
+     * @param boolean $pin Pin this object when adding. @todo I think this does nothing. check API
+     * @param boolean $r Recursive. Add directory paths recursively.
+     * @param boolean $t Trickle. Use trickle-dag format for dag generation.
+     * @param boolean $w Wrap-with-directory. Wrap files with a directory object.
      *
      * @todo update to polymorphic function to handle directory uploads
+     * @todo implement chunking algorithm choice
      *
      * @return string Hash of added file
      */
-    public static function addLocalFileFromPath($objectPath, $objectName)
+    public static function addLocalObjectFromPath($objectPath, $objectName = false, $H = true, $n = false, $p = true, $pin = true, $r = false, $t = false, $w = false)
     {
         // @todo abstract this client away
 	    $client = new \GuzzleHttp\Client([
@@ -36,25 +58,29 @@ class Ipfs
             'track_redirects' => false,
             'expect' => true // not sure if this is necessary, check expect docs note about http 1.1
         ]);
-        // @todo test response time of request with request options enabled
 	    $response = $client->request('POST', 'add', [
-	        /*'headers' => [
-                'boundary' => 'CUSTOM'
-            ],*/
 	        'multipart' => [
                 [
                     'Content-Type' => 'multipart/formdata',
                     'name' => $objectName,
                     'contents' => fopen(realpath($objectPath), "r"),
                 ]
-            ],/*
+            ],
 	        'query' => [
-                'stream-channels' => true
-            ]*/
+	            'H' => $H,
+	            'n' => $n,
+                'p' => $p,
+                'pin' => $pin,
+                'r' => $r,
+                't' => $t,
+                'w' => $w
+            ]
         ]);
-        //var_dump($response);
-        $output = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
-        return $output['Hash'];
+        var_dump($response);
+        $body = $response->getBody();
+        return $body;
+        //$output = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
+        //return $output['Hash'];
     }
 
     /*
@@ -97,6 +123,26 @@ class Ipfs
     }
 
     /*
+     * ping
+     * @todo everything
+     */
+    public static function getLatencyToRemoteHost($peerID)
+    {
+        $client = new Client([
+            'base_uri' => 'http://localhost:5001/api/v0/'
+        ]);
+        $response = $client->request('POST', 'ping', [
+            'debug' => true,
+            'query' => [
+                'arg' => $peerID
+            ]
+        ]);
+        $outputData = $response->getBody();
+        var_dump($response);
+        return gettype($outputData);
+
+    }
+    /*
      * adds tar file to local ipfs node from local filepath
      *
      * @param string $tarPath /path/to/tar
@@ -111,13 +157,43 @@ class Ipfs
     /*
      * stats/bw: prints ipfs bandwidth information
      *
+     * Call $peer or $proto but not both!
+     *
+     * @param string $peer peer id
+     * @param string $proto protocol to print bw stats for
+     *
+     * @todo implement poll and interval
+     *
      * @return array
      */
-    public static function getBandwidthStats()
+    public static function getBandwidthStats($peer = null, $proto = null, $poll = false, $interval = '1s')
     {
         $client = new Client(['base_uri' => 'http://localhost:5001/api/v0/']);
-        $response = $client->request('POST', 'stats/bw');
-        $output = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
+        /*
+         * this response returns an assoc array with 4 pairs
+         * of key/values but they may not need to be accurate
+         */
+        $response = $client->request('POST', 'stats/bw', [
+            //'debug' => true,
+            'query' => [
+                'peer' => $peer,
+                'proto' => $proto,
+                //'poll' => true,
+                //'interval' => $interval
+            ]
+        ]);
+
+        // extract data to assoc array
+        $outputData = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
+
+        // fill array with human-readable stats
+        $i = -1;
+        foreach($outputData as $key => $value)
+        {
+            $i++;
+            $output[$i] = $key.' = '.self::getHumanReadableBytes($value);
+        }
+
         return $output;
     }
 
