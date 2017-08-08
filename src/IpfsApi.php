@@ -13,6 +13,19 @@ use GuzzleHttp\Client;
 
 class Ipfs
 {
+    private static function getClient()
+    {
+        $client = new \GuzzleHttp\Client([
+            'base_uri' => 'http://localhost:5001/api/v0/',
+            'max' => 5,
+            'strict' => false,
+            'referer' => false,
+            'protocols' => ['http'],
+            'track_redirects' => false,
+            'expect' => true // not sure if this is necessary, check expect docs note about http 1.1
+        ]);
+        return $client;
+    }
     /*
      * @link https://gist.github.com/liunian/9338301
      */
@@ -33,36 +46,24 @@ class Ipfs
      *
      * @param string $objectPath /path/to/local/file
      * @param string $objectName
-     * @param boolean $H Hidden. Include files that are hidden. @todo I think this does nothing. check API
+     * @param boolean $H Hidden. Include files that are hidden. @todo test
      * @param boolean $n Only-hash. Only chunk and hash - do not write to disk. can be tested by running ipfs pin ls (I think)
      * @param boolean $p Progress. Stream progress data. @todo not sure what this does, if anything. find out
-     * @param boolean $pin Pin this object when adding. @todo I think this does nothing. check API
+     * @param boolean $pin Pin this object when adding. @todo test
      * @param boolean $r Recursive. Add directory paths recursively.
      * @param boolean $t Trickle. Use trickle-dag format for dag generation.
      * @param boolean $w Wrap-with-directory. Wrap files with a directory object.
      *
-     * @todo update to polymorphic function to handle directory uploads
-     * @todo implement chunking algorithm choice
-     *
      * @return string Hash of added file
      */
-    public static function addLocalObjectFromPath($objectPath, $objectName = false, $H = true, $n = false, $p = true, $pin = true, $r = false, $t = false, $w = false)
+    public static function add($objectPath, $H = false, $n = false, $p = true, $pin = true, $r = false, $t = false, $w = false)
     {
-        // @todo abstract this client away
-	    $client = new \GuzzleHttp\Client([
-            'base_uri' => 'http://localhost:5001/api/v0/',
-            'max' => 5,
-            'strict' => false,
-            'referer' => false,
-            'protocols' => ['http'],
-            'track_redirects' => false,
-            'expect' => true // not sure if this is necessary, check expect docs note about http 1.1
-        ]);
+	    $client = self::getClient();
 	    $response = $client->request('POST', 'add', [
 	        'multipart' => [
                 [
                     'Content-Type' => 'multipart/formdata',
-                    'name' => $objectName,
+                    'name' => 'file_to_add',
                     'contents' => fopen(realpath($objectPath), "r"),
                 ]
             ],
@@ -76,9 +77,8 @@ class Ipfs
                 'w' => $w
             ]
         ]);
-        var_dump($response);
-        $body = $response->getBody();
-        return $body;
+        $output = $response->getBody()->getContents();
+        return $output;
         //$output = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
         //return $output['Hash'];
     }
@@ -91,15 +91,7 @@ class Ipfs
     public static function findRemoteProvidersByObjectHash($hash)
     {
         // @todo abstract this client away
-        $client = new \GuzzleHttp\Client([
-            'base_uri' => 'http://localhost:5001/api/v0/',
-            'max' => 5,
-            'strict' => false,
-            'referer' => false,
-            'protocols' => ['http'],
-            'track_redirects' => false,
-            'expect' => true // not sure if this is necessary, check expect docs note about http 1.1
-        ]);
+        $client = self::getClient();
         $response = $client->request('POST', 'dht/findprovs', [
            'query' => [
                'arg' => $hash
@@ -128,9 +120,7 @@ class Ipfs
      */
     public static function getLatencyToRemoteHost($peerID)
     {
-        $client = new Client([
-            'base_uri' => 'http://localhost:5001/api/v0/'
-        ]);
+        $client = self::getClient();
         $response = $client->request('POST', 'ping', [
             'debug' => true,
             'query' => [
@@ -168,7 +158,7 @@ class Ipfs
      */
     public static function getBandwidthStats($peer = null, $proto = null, $poll = false, $interval = '1s')
     {
-        $client = new Client(['base_uri' => 'http://localhost:5001/api/v0/']);
+        $client = self::getClient();
         /*
          * this response returns an assoc array with 4 pairs
          * of key/values but they may not need to be accurate
@@ -204,7 +194,7 @@ class Ipfs
      */
     public static function version()
     {
-        $client = new \GuzzleHttp\Client(['base_uri' => 'http://localhost:5001/api/v0/']);
+        $client = self::getClient();
         $response = $client->request('POST', 'version');
         $output = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
 
