@@ -1,5 +1,5 @@
 # PHP-IPFS
-
+WARNING: This is a WIP, and figuring out how the API works or even which commands/flags work is quite the journey. Use at your own peril.
 ## Getting Started
 ### Prerequisites
 // TODO

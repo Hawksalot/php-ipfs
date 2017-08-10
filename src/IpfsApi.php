@@ -13,6 +13,9 @@ use GuzzleHttp\Client;
 
 class Ipfs
 {
+    /*
+     * instantiates Client instance for other functions to use to connect to local IPFS daemon
+     */
     private static function getClient()
     {
         $client = new \GuzzleHttp\Client([
@@ -26,6 +29,7 @@ class Ipfs
         ]);
         return $client;
     }
+
     /*
      * @link https://gist.github.com/liunian/9338301
      */
@@ -46,7 +50,7 @@ class Ipfs
      *
      * @param string $objectPath /path/to/local/file
      * @param string $objectName
-     * @param boolean $H Hidden. Include files that are hidden. @todo test
+     * @param boolean $H Hidden. Include files that are hidden. Only takes effect on recursive add
      * @param boolean $n Only-hash. Only chunk and hash - do not write to disk. can be tested by running ipfs pin ls (I think)
      * @param boolean $p Progress. Stream progress data. @todo not sure what this does, if anything. find out
      * @param boolean $pin Pin this object when adding. @todo test
@@ -59,12 +63,12 @@ class Ipfs
     public static function add($objectPath, $H = false, $n = false, $p = true, $pin = true, $r = false, $t = false, $w = false)
     {
 	    $client = self::getClient();
-	    $response = $client->request('POST', 'add', [
+        $response = $client->request('POST', 'add', [
 	        'multipart' => [
                 [
                     'Content-Type' => 'multipart/formdata',
-                    'name' => 'file_to_add',
-                    'contents' => fopen(realpath($objectPath), "r"),
+                    'name' => 'object_to_add',
+                    'contents' => fopen(realpath($objectPath), "r")
                 ]
             ],
 	        'query' => [
@@ -77,10 +81,172 @@ class Ipfs
                 'w' => $w
             ]
         ]);
-        $output = $response->getBody()->getContents();
+        $output = $response->getBody();
         return $output;
         //$output = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
         //return $output['Hash'];
+    }
+
+    /*
+     * bitswap/stat
+     *
+     * @return array
+     */
+    public static function bitswapStat()
+    {
+        $client = self::getClient();
+        $response = $client->request('POST', 'bitswap/stat');
+        $output = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
+        return $output;
+    }
+
+    /*
+     * bitswap/unwant
+     */
+    public static function bitswapUnwant(...$args)
+    {
+        $client = self::getClient();
+        foreach($args as $arg)
+        {
+            $response = $client->request('POST', 'bitswap/unwant', [
+                'query' => [
+                    'arg' => $arg
+                ]
+            ]);
+        }
+        $output = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
+        return $output;
+    }
+
+    /*
+     * bitswap/wantlist
+     */
+    public static function bitswapWantlist($peer)
+    {
+        $client = self::getClient();
+        $response = $client->request('POST', 'bitswap/wantlist', [
+            'query' => [
+                'peer' => $peer
+            ]
+        ]);
+        $output = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
+        return $output;
+    }
+
+    /*
+     * block/get
+     *
+     * @return string
+     */
+    public static function blockGet($hash)
+    {
+        $client = self::getClient();
+        $response = $client->request('POST', 'block/get', [
+            'query' => [
+                'arg' => $hash
+            ]
+        ]);
+        $output = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
+        return $output;
+    }
+
+    /*
+     * block/put
+     */
+    public static function blockPut($dataPath)
+    {
+        $client = self::getClient();
+        $response = $client->request('POST', 'block/put', [
+            'multipart' => [
+                [
+                    'Content-Type' => 'multipart/formdata',
+                    'name' => 'raw_block_data',
+                    'content' => fopen(realpath($dataPath), "r")
+                ]
+            ]
+        ]);
+        $output = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
+        return $output;
+    }
+
+    /*
+     * block/stat
+     */
+    public static function blockStat($hash)
+    {
+        $client = self::getClient();
+        $response = $client->request('POST', 'block/stat', [
+            'query' => [
+                'arg' => $hash
+            ]
+        ]);
+        $output = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
+        return $output;
+    }
+
+    /*
+     * bootstrap & bootstrap/list
+     */
+    public static function bootstrap()
+    {
+        $client = self::getClient();
+        $response = $client->request('POST', 'bootstrap');
+        $output = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
+        return $output;
+    }
+
+    /*
+     * bootstrap/add
+     *
+     * @todo this implements the default option in a weird way. try to implement it a better way
+     */
+    public static function bootstrapAdd($peer)
+    {
+        $client = self::getClient();
+        if($peer === 'default')
+        {
+            $response = $client->request('POST', 'bootstrap/add', [
+                'query' => [
+                    'default'
+                ]
+            ]);
+        }
+        else
+        {
+            $response = $client->request('POST', 'bootstrap/add', [
+                'query' => [
+                    'arg' => $peer
+                ]
+            ]);
+        }
+        $output = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
+        return $output;
+    }
+
+    /*
+     * bootstrap/rm
+     */
+    public static function boostrapRm($peer)
+    {
+        $client = self::getClient();
+        if($peer === 'all')
+        {
+            $response = $client->request('POST', 'bootstrap/rm', [
+                'query' => [
+                    'all'
+                ]
+            ]);
+        }
+        else
+        {
+            $response = $client->request('POST', 'bootstrap/rm', [
+                'query' => [
+                    'arg' => $peer
+                ]
+            ]);
+        }
+        $output = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
+        return $output;
     }
 
     /*
