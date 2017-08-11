@@ -54,7 +54,7 @@ class Ipfs
      * @param boolean $n Only-hash. Only chunk and hash - do not write to disk. can be tested by running ipfs pin ls (I think)
      * @param boolean $p Progress. Stream progress data. @todo not sure what this does, if anything. find out
      * @param boolean $pin Pin this object when adding. @todo test
-     * @param boolean $r Recursive. Add directory paths recursively.
+     * @param boolean $r Recursive. Add directory paths recursively. @todo get function to stream directory and directory contents
      * @param boolean $t Trickle. Use trickle-dag format for dag generation.
      * @param boolean $w Wrap-with-directory. Wrap files with a directory object.
      *
@@ -81,10 +81,8 @@ class Ipfs
                 'w' => $w
             ]
         ]);
-        $output = $response->getBody();
+        $output = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
         return $output;
-        //$output = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
-        //return $output['Hash'];
     }
 
     /*
@@ -198,6 +196,8 @@ class Ipfs
     /*
      * bootstrap/add
      *
+     * @param string $peer in format /ip4/$ip/tcp/$port/ipfs/$peerID
+     *
      * @todo this implements the default option in a weird way. try to implement it a better way
      */
     public static function bootstrapAdd($peer)
@@ -225,6 +225,10 @@ class Ipfs
 
     /*
      * bootstrap/rm
+     *
+     * @param string $peer peerID in format /ip4/$ip/tcp/$port/ipfs/$peerID
+     *
+     * @todo this implementes the all option in a weird way. try to make it work in a better way
      */
     public static function boostrapRm($peer)
     {
@@ -250,13 +254,116 @@ class Ipfs
     }
 
     /*
+     * cat
+     *
+     * @param string $hash the hash of the IPFS content to be pulled
+     */
+    public static function cat($hash)
+    {
+        $client = self::getClient();
+        $response = $client->request('POST', 'cat', [
+            'query' => [
+                'arg' => $hash
+            ]
+        ]);
+        // @todo return different ouputs based on response
+        return $response;
+    }
+
+    /*
+     * commands
+     *
+     * @todo decide if this functionality is even reasonable to leave in
+     */
+    public static function commands()
+    {
+        $client = self::getClient();
+        $response = $client->request('POST', 'commands');
+        $output = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
+        return $output;
+    }
+
+    /*
+     * config
+     *
+     * @param string $arg1 config option to either retrieve value of or change value of
+     * @param string $arg2 value to change config option to
+     *
+     * @todo implement use of bool and json variables
+     */
+    public static function config($arg1, $arg2)
+    {
+        $client = self::getClient();
+        $response = $client->request('POST', 'config', [
+            'query' => [
+                'arg1' => $arg1,
+                'arg2' => $arg2
+            ]
+        ]);
+        $output = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
+        return $output;
+    }
+
+    /*
+     * config/replace
+     *
+     * @param string $configFilePath local location of new config file
+     */
+    public static function configReplace($configFilePath)
+    {
+        $client = self::getClient();
+        $response = $client->request('POST', 'config/replace', [
+            'multipart' => [
+                [
+                    'Content-Type' => 'multipart/formdata',
+                    'name' => 'new_config_file',
+                    'contents' => fopen(realpath($configFilePath), "r")
+                ]
+            ]
+        ]);
+        $output = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
+        return $output;
+    }
+
+    /*
+     * config/show
+     *
+     * SECURITY WARNING: THIS WILL OUTPUT YOUR PRIVATE KEY
+     */
+    public static function configShow()
+    {
+        $client = self::getClient();
+        $response = $client->request('POST', 'config/show');
+        $output = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
+        return $output;
+    }
+
+    /*
+     * dht/findpeer
+     *
+     * @param string $peerID hash of peer to target
+     */
+    public static function dhtFindpeer($peerID)
+    {
+        $client = self::getClient();
+        $response = $client->request('POST', 'dht/findpeer', [
+            'query' => [
+                'arg' => $peerID
+            ]
+        ]);
+        $output = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
+        return $output;
+    }
+
+    /*
      * dht/findprovs: finds remote IPFS nodes that are hosting target Merkle-Dag hash
+     *
+     * @param string $hash IPFS content hash to find providers for
      *
      * @return string
      */
-    public static function findRemoteProvidersByObjectHash($hash)
+    public static function dhtFindprovs($hash)
     {
-        // @todo abstract this client away
         $client = self::getClient();
         $response = $client->request('POST', 'dht/findprovs', [
            'query' => [
@@ -264,50 +371,458 @@ class Ipfs
            ]
         ]);
         // @todo parse response to return meaningful, useful data
-        $output = $response->getBody()->getContents();
+        $output = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
         return $output;
     }
 
     /*
-     * adds file to local ipfs node by Merkle-Dag hash
+     * dht/get
      *
-     * @param string $hash Merkle-Dag hash of target file
-     *
-     * @todo everything
+     * @param string $hash content hash to find providers for
      */
-    public static function addRemoteObjectFromHash($hash)
+    public static function dhtGet($hash)
     {
-       //
+        $client = self::getClient();
+        $response = $client->request('POST', 'dht/get', [
+            'query' => [
+                'arg' => $hash
+            ]
+        ]);
+        $output = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
+        return $output;
     }
 
     /*
-     * ping
-     * @todo everything
+     * dht/put
+     *
+     * @param string $key key part of key-value pair to write to IPFS
+     * @param string $value value part of key-value
      */
-    public static function getLatencyToRemoteHost($peerID)
+    public static function dhtPut($key, $value)
     {
         $client = self::getClient();
-        $response = $client->request('POST', 'ping', [
-            'debug' => true,
+        $response = $client->request('POST', 'dht/put', [
+            'query' => [
+                'arg1' => $key,
+                'arg2' => $value
+            ]
+        ]);
+        $output = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
+        return $output;
+    }
+
+    /*
+     * dht/query
+     *
+     * @param string $peerID hash of peer to find similar peers for
+     */
+    public static function dhtQuery($peerID)
+    {
+        $client = self::getClient();
+        $response = $client->request('POST', 'dht/query', [
             'query' => [
                 'arg' => $peerID
             ]
         ]);
-        $outputData = $response->getBody();
-        var_dump($response);
-        return gettype($outputData);
-
+        $output = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
+        return $output;
     }
+
     /*
-     * adds tar file to local ipfs node from local filepath
-     *
-     * @param string $tarPath /path/to/tar
-     *
-     * @todo everything
+     * diag/cmds
      */
-    public static function tarAdd($tarPath)
+    public static function diagCmds()
     {
-	    //
+        $client = self::getClient();
+        $response = $client->request('POST', 'diag/cmds');
+        $output = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
+        return $output;
+    }
+
+    /*
+     * diag/cmds/clear
+     */
+    public static function diagCmdsClear()
+    {
+        $client = self::getClient();
+        $response = $client->request('POST', 'diag/cmds/clear');
+        $output = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
+        return $output;
+    }
+
+    /*
+     * diag/cmds/set-time
+     *
+     * @param string $time time to keep inactive requests in log
+     */
+    public static function diagCmdsSetTime($time)
+    {
+        $client = self::getClient();
+        $response = $client->request('POST', 'diag/cmds/set-time', [
+            'query' => [
+                'arg' => $time
+            ]
+        ]);
+        $output = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
+        return $output;
+    }
+
+    /*
+     * diag/net
+     *
+     * @param string $format what format to use for output. Possible values: text, d3, dot
+     */
+    public static function diagNet($format)
+    {
+        $client = self::getClient();
+        $response = $client->request('POST', 'diag/net', [
+            'query' => [
+                'vis' => $format
+            ]
+        ]);
+        $output = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
+        return $output;
+    }
+
+    /*
+     * diag/sys
+     */
+    public static function diagSys()
+    {
+        $client = self::getClient();
+        $response = $client->request('POST', 'diag/sys');
+        $output = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
+        return $output;
+    }
+
+    /*
+     * dns
+     *
+     * @param string $domain DNS name
+     * @param boolean $recursive resolve until the result is not a DNS link
+     */
+    public static function dns($domain, $recursive = false)
+    {
+        $client = self::getClient();
+        $response = $client->request('POST', 'dns', [
+            'query' => [
+                'arg' => $domain,
+                'recursive' => $recursive
+            ]
+        ]);
+        $output = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
+        return $output;
+    }
+
+    /*
+     * file/ls
+     *
+     * @param string $hash IPFS object to list links for
+     */
+    public static function fileLs($hash)
+    {
+        $client = self::getClient();
+        $response = $client->request('POST', 'file/ls', [
+            'query' => [
+                'arg' => $hash
+            ]
+        ]);
+        $output = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
+        return $output;
+    }
+
+    /*
+     * files/rm
+     *
+     * @param string $apiFilePath file location in files API to remove
+     * @param boolean $recursive is target a directory?
+     * @param boolean $flush flush target and ancestors after write
+     */
+    public static function filesRm($apiFilePath, $recursive = false, $flush = true)
+    {
+        $client = self::getClient();
+        $response = $client->request('POST', 'files/rm', [
+            'query' => [
+                'arg' => $apiFilePath,
+                'r' => $recursive,
+                'f' => $flush
+            ]
+        ]);
+        $output = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
+        return $output;
+    }
+
+    /*
+     * files/flush
+     *
+     * @param string $apiFilePath path to flush
+     *
+     * @todo check for difference in API action between no argument and empty argument
+     */
+    public static function filesFlush($apiFilePath)
+    {
+        $client = self::getClient();
+        $response = $client->request('POST', 'files/flush', [
+            'query' => [
+                'arg' => $apiFilePath
+            ]
+        ]);
+        $output = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
+        return $output;
+    }
+
+    /*
+     * files/mv
+     *
+     * @param string $apiFilePath1 files api location source
+     * @param string $apiFilePath2 files api location destination
+     * @param boolean $flush flush target and ancestors after write
+     */
+    public static function filesMv($apiFilePath1, $apiFilePath2, $flush = true)
+    {
+        $client = self::getClient();
+        $response = $client->request('POST', 'files/mv', [
+            'query' => [
+                'arg' => $apiFilePath1,
+                'arg2' => $apiFilePath2,
+                'f' => $flush
+            ]
+        ]);
+        $output = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
+        return $output;
+    }
+
+    /*
+     * files/cp
+     *
+     * @param string $apiFilePath1 files api location source
+     * @param string $apiFilePath2 files api location destination
+     * @param boolean $flush flush target and ancestors after write
+     */
+    public static function filesCp($apiFilePath1, $apiFilePath2, $flush = true)
+    {
+        $client = self::getClient();
+        $response = $client->request('POST', 'files/cp', [
+            'query' => [
+                'arg' => $apiFilePath1,
+                'arg2' => $apiFilePath2,
+                'f' => $flush
+            ]
+        ]);
+        $output = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
+        return $output;
+    }
+
+    /*
+     * files/ls
+     *
+     * @param string $apiFilePath files api location to list links for
+     * @param boolean $longFormat use long listing format
+     * @param boolean $flush flush target and ancestors after write
+     */
+    public static function filesLs($apiFilePath, $longFormat = false, $flush = true)
+    {
+        $client = self::getClient();
+        $response = $client->request('POST', 'files/ls', [
+            'query' => [
+                'arg' => $apiFilePath,
+                'l' => $longFormat,
+                'f' => $flush
+            ]
+        ]);
+        $output = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
+        return $output;
+    }
+
+    /*
+     * files/mkdir
+     *
+     * @param string $apiDirPath path to target directory
+     * @param boolean $parents make parent directories if necessary
+     * @param boolean $flush flush target and ancestors after write
+     */
+    public static function filesMkdir($apiDirPath, $parents = false, $flush = true)
+    {
+        $client = self::getClient();
+        $response = $client->request('POST', 'files/mkdir', [
+            'query' => [
+                'arg' => $apiDirPath,
+                'p' => $parents,
+                'f' => $flush
+            ]
+        ]);
+        $output = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
+        return $output;
+    }
+
+    /*
+     * files/stat
+     *
+     * @param string $apiFilePath path to file to stat
+     * @param boolean $flush flush target and ancestors after write
+     */
+    public static function filesStat($apiFilePath, $flush = true)
+    {
+        $client = self::getClient();
+        $response = $client->request('POST', 'files/stat', [
+            'query' => [
+                'arg' => $apiFilePath,
+                'f' => $flush
+            ]
+        ]);
+        $output = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
+        return $output;
+    }
+
+    /*
+     * files/read
+     *
+     * @param string $apiFilePath files api location to read
+     * @param number $offset byte offset to begin reading from
+     * @param number $count maximum number of bytes to read
+     * @param boolean $flush flush target and ancestors after write
+     */
+    public static function filesRead($apiFilePath, $offset = 0, $count, $flush = true)
+    {
+        $client = self::getClient();
+        if($count)
+        {
+            $response = $client->request('POST', 'files/read', [
+                'query' => [
+                    'arg' => $apiFilePath,
+                    'o' => $offset,
+                    'n' => $count,
+                    'f' = $flush
+                ]
+            ]);
+        }
+        else
+        {
+            $response = $client->request('POST', 'files/read', [
+                'query' => [
+                    'arg' => $apiFilePath,
+                    'o' => $offset,
+                    'f' => $flush
+                ]
+            ]);
+        }
+        $output = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
+        return $output;
+    }
+
+    /*
+     * files/write
+     *
+     * @param string $apiFilePath path to write data to
+     * @param string $dataPath local data to write
+     * @param number $offset byte offset to begin writing at
+     * @param number $count maximum number of bytes to read
+     * @param boolean $create create the file if it does not exist
+     * @param boolean $truncate truncate the file to size zero before writing
+     * @param boolean $flush flush target and ancestors after write
+     */
+    public static function filesWrite($apiFilePath, $dataPath, $offset = 0, $count, $create = true, $truncate = false, $flush = true)
+    {
+        $client = self::getClient();
+        if($count)
+        {
+            $response = $client->request('POST', 'files/write', [
+                'query' => [
+                    'arg' => $apiFilePath,
+                    'arg2' => $dataPath,
+                    'o' => $offset,
+                    'n' => $count,
+                    'e' => $create,
+                    't' => $truncate,
+                    'f' => $flush
+                ]
+            ]);
+        }
+        else
+        {
+            $response = $client->request('POST', 'files/write', [
+                'query' => [
+                    'arg' => $apiFilePath,
+                    'arg2' => $dataPath,
+                    'o' => $offset,
+                    'e' => $create,
+                    't' => $truncate,
+                    'f' => $flush
+                ]
+            ]);
+        }
+        $output = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
+        return $output;
+    }
+
+    /*
+     * get
+     *
+     * @param string $hash IPFS hash to output data from
+     * @param boolean $tar output tar
+     * @param boolean $gzip output gzip
+     * @param number $compression level of compression from 0-9
+     */
+    public static function get($hash, $tar = false, $gzip = false, $compression = -1)
+    {
+        $client = self::getClient();
+        $response = $client->request('POST','get', [
+            'query' => [
+                'arg' => $hash,
+                'archive' => $tar,
+                'compress' => $gzip,
+                'compression' => $compression
+            ]
+        ]);
+        $output = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
+        return $output;
+    }
+
+    /*
+     * id
+     *
+     * @param string $peerID hash peerID of node to look up. If blank, outputs local ID
+     */
+    public static function id($peerID)
+    {
+        $client = self::getClient();
+        $response = $client->request('POST', 'id', [
+            'query' => [
+                'arg' => $peerID
+            ]
+        ]);
+        $output = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
+        return $output;
+    }
+
+    /*
+     * log/level
+     *
+     * @param string $system which subsystem to output logging identifiers for. bitswap/blockstore/dht/merkledag/all
+     * @param string $debugLevel what level of debugging to use. critical/error/warning/notice/info/debug
+     */
+    public static function logLevel($system, $debugLevel)
+    {
+        $client = self::getClient();
+        $response = $client->request('POST', 'log/level', [
+            'query' => [
+                'arg1' => $system,
+                'arg2' => $debugLevel
+            ]
+        ]);
+        $output = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
+        return $output;
+    }
+
+    /*
+     * log/ls
+     */
+    public static function logLs()
+    {
+        $client = self::getClient();
+        $response = $client->request('POST', 'log/ls');
+        $output = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
+        return $output;
     }
 
     /*
@@ -322,7 +837,7 @@ class Ipfs
      *
      * @return array
      */
-    public static function getBandwidthStats($peer = null, $proto = null, $poll = false, $interval = '1s')
+    public static function statsBw($peer = null, $proto = null, $poll = false, $interval = '1s')
     {
         $client = self::getClient();
         /*
@@ -351,6 +866,18 @@ class Ipfs
         }
 
         return $output;
+    }
+
+    /*
+    * adds tar file to local ipfs node from local filepath
+    *
+    * @param string $tarPath /path/to/tar
+    *
+    * @todo everything
+    */
+    public static function tarAdd($tarPath)
+    {
+        //
     }
 
     /*
