@@ -783,9 +783,14 @@ class Ipfs
      *
      * @param string $peerID hash peerID of node to look up. If blank, outputs local ID
      */
-    public static function id($peerID)
+    public static function id($peerID = "default")
     {
         $client = self::getClient();
+        if($peerID === "default")
+        {
+            $selfInfo = shell_exec('ipfs id');
+            $peerID = $selfInfo['ID'];
+        }
         $response = $client->request('POST', 'id', [
             'query' => [
                 'arg' => $peerID
@@ -824,6 +829,198 @@ class Ipfs
         $output = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
         return $output;
     }
+
+    /*
+     * log/tail
+     */
+    public static function logTail()
+    {
+        $client = self::getClient();
+        $response = $client->request('POST', 'log/tail');
+        $output = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
+        return $output;
+    }
+
+    /*
+     * ls
+     *
+     * @param string $hash IPFS content hash
+     * @param boolean $resolve resolve linked objects to find out their types
+     */
+    public static function ls($hash, $resolve = true)
+    {
+        $client = self::getClient();
+        $response = $client->request('POST', 'ls', [
+            'query' => [
+                'arg' => $hash,
+                'resolve' => $resolve
+            ]
+        ]);
+        $output = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
+        return $output;
+    }
+
+    /*
+     * name/publish
+     *
+     * @param string $hash IPFS path of the object to be published
+     * @param boolean $resolve resolve given path before publishing
+     * @param time $lifetime time duration that the record will be valid
+     * @param time $ttl time duration this record should be cached for. EXPERIMENTAL AND NOT INCLUDED
+     */
+    public static function namePublish($hash, $resolve = true, $lifetime = '24h')
+    {
+        $client = self::getClient();
+        if(!$hash)
+        {
+            $hash = self::id()['PublicKey'];
+        }
+        $response = $client->request('POST', 'name/publish', [
+            'query' => [
+                'arg' => $hash,
+                'resolve' => $resolve,
+                'lifetime' => $lifetime
+            ]
+        ]);
+        $output = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
+        return $output;
+    }
+
+    /*
+     * name/resolve
+     *
+     * @param string $hash IPNS hash to resolve
+     * @param boolean $recursive resolve until the result is not an IPNS name
+     * @param boolean $nocache do not use cached entries
+     */
+    public static function nameResolve($hash, $recursive = false, $nocache = false)
+    {
+        $client = self::getClient();
+        $response = $client->request('POST', 'name/resolve', [
+            'query' => [
+                'arg' => $hash,
+                'recursive' => $recursive,
+                'nocache' => $nocache
+            ]
+        ]);
+        $output = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
+        return $output;
+    }
+
+    /*
+     * object/data
+     *
+     * @param string $hash key of the object to retrieve
+     */
+    public static function objectData($hash)
+    {
+        $client = self::getClient();
+        $response = $client->request('POST', 'object/data', [
+            'query' => [
+                'arg' => $hash
+            ]
+        ]);
+        $output = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
+        return $output;
+    }
+
+    /*
+     * object/diff
+     *
+     * @param string $hash1 hash of object to diff against
+     * @param string $hash2 hash of object to diff
+     */
+    public static function objectDiff($hash1, $hash2)
+    {
+        $client = self::getClient();
+        $response = $client->request('POST', 'object/diff', [
+            'query' => [
+                'arg1' => $hash1,
+                'arg2' => $hash2
+            ]
+        ]);
+        $output = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
+        return $output;
+    }
+
+    /*
+     * object/get
+     *
+     * @param string $hash key of the object to retrieve
+     * @param string $encoding serializes the DAG node to the format specified. Possible values: json, protobuf, xml
+     */
+    public static function objectGet($hash, $encoding = 'json')
+    {
+        $client = self::getClient();
+        $response = $client->request('POST', 'object/get', [
+            'query' => [
+                'arg' => $hash,
+                'encoding' => $encoding
+            ]
+        ]);
+        $output = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
+        return $output;
+    }
+
+    /*
+     * object/links
+     *
+     * @param string $hash key of the object to retrieve
+     */
+    public static function objectLinks($hash)
+    {
+        $client = self::getClient();
+        $response = $client->request('POST', 'object/links', [
+            'query' => [
+                'arg' => $hash
+            ]
+        ]);
+        $output = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
+        return $output;
+    }
+
+    /*
+     * object/new
+     *
+     * @param $template template to use. Only possible value is unixfs (untested)
+     */
+    public static function objectNew($template = 'unixfs')
+    {
+        $client = self::getClient();
+        $response = $client->request('POST', 'object/new', [
+            'query' => [
+                'template' => $template
+            ]
+        ]);
+        $output = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
+        return $output;
+    }
+
+    /*
+     * object/patch/append-data
+     *
+     * @param string $hash hash of the object to modify
+     * @param string $dataPath path to data to append
+     */
+    public static function objectPathAppendData($hash, $dataPath)
+    {
+        $client = self::getClient();
+        $response = $client->request('POST', 'object/patch/append-data', [
+            'multipart' => [
+                [
+                    'Content-Type' => 'multipart/formdata',
+                    'name' => 'data_to_append_to_object',
+                    'contents' => fopen(realpath($dataPath), "r")
+                ]
+            ],
+            'query' => [
+                'arg1' => $hash
+            ]
+        ]);
+        $output = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
+        return $output;
+    }
+    
 
     /*
      * stats/bw: prints ipfs bandwidth information

@@ -16,6 +16,7 @@ log/level becomes logLevel.
 
 ```
 use PhpIpfs\Ipfs;
+$filePath = '/path/to/local/file';
 $getHashOnly = true;
 $hashOfFile = Ipfs::add($filePath, $getHashOnly);
 $peersWithFile = Ipfs::dhtFindprovs($hashOfFile);
