@@ -1,7 +1,7 @@
 <?php
 
 require_once __DIR__ . '/../vendor/autoload.php';
-require '../src/IpfsApi.php';
+require '../src/Ipfs.php';
 
 use PhpIpfs\Ipfs;
 

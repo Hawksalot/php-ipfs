@@ -9,8 +9,6 @@ namespace PhpIpfs;
 /*
  * Ipfs
  */
-use GuzzleHttp\Client;
-
 class Ipfs
 {
     /*
