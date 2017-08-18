@@ -52,7 +52,7 @@ class Ipfs
      * @param string $objectName
      * @param boolean $H Hidden. Include files that are hidden. Only takes effect on recursive add
      * @param boolean $n Only-hash. Only chunk and hash - do not write to disk. can be tested by running ipfs pin ls (I think)
-     * @param boolean $p Progress. Stream progress data. @todo not sure what this does, if anything. find out
+     * @param boolean $p Progress. Stream progress data. TEMPORARILY SET TO ALWAYS FALSE
      * @param boolean $pin Pin this object when adding. @todo test
      * @param boolean $r Recursive. Add directory paths recursively. @todo get function to stream directory and directory contents
      * @param boolean $t Trickle. Use trickle-dag format for dag generation.
@@ -74,14 +74,16 @@ class Ipfs
 	        'query' => [
 	            'H' => $H,
 	            'n' => $n,
-                'p' => $p,
+                'p' => false,
                 'pin' => $pin,
                 'r' => $r,
                 't' => $t,
                 'w' => $w
             ]
         ]);
-        $output = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
+        $htmlString = htmlentities($response->getBody()->getContents());
+        $formattedHtml = html_entity_decode($htmlString);
+        $output = json_decode($formattedHtml, true);
         return $output;
     }
 
@@ -692,7 +694,7 @@ class Ipfs
                     'arg' => $apiFilePath,
                     'o' => $offset,
                     'n' => $count,
-                    'f' = $flush
+                    'f' => $flush
                 ]
             ]);
         }
@@ -1020,7 +1022,7 @@ class Ipfs
         $output = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
         return $output;
     }
-    
+
 
     /*
      * stats/bw: prints ipfs bandwidth information
