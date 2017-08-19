@@ -24,6 +24,7 @@ class ComposerStaticInit102421ca19974d1c3a73a3ea9b4b251f
         'P' => 
         array (
             'Psr\\Http\\Message\\' => 17,
+            'PhpIpfs\\' => 8,
         ),
         'G' => 
         array (
@@ -52,6 +53,11 @@ class ComposerStaticInit102421ca19974d1c3a73a3ea9b4b251f
         'Psr\\Http\\Message\\' => 
         array (
             0 => __DIR__ . '/..' . '/psr/http-message/src',
+        ),
+        'PhpIpfs\\' => 
+        array (
+            0 => __DIR__ . '/../..' . '/src',
+            1 => __DIR__ . '/../..' . '/tests',
         ),
         'GuzzleHttp\\Psr7\\' => 
         array (

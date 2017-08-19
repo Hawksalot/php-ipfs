@@ -11,7 +11,12 @@
     },
     "autoload": {
         "psr-4": {
-            "PhpIpfs": "tests/"
+            "PhpIpfs\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "PhpIpfs\\": "tests"
         }
     }
 }
