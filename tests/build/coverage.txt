@@ -1,0 +1,12 @@
+
+
+Code Coverage Report:     
+  2017-08-19 07:13:56     
+                          
+ Summary:                 
+  Classes:  0.00% (0/1)   
+  Methods:  5.36% (3/56)  
+  Lines:    5.83% (20/343)
+
+\PhpIpfs::Ipfs
+  Methods:   5.36% ( 3/56)   Lines:   5.83% ( 20/343)

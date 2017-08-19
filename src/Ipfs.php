@@ -44,6 +44,21 @@ class Ipfs
     }
 
     /*
+     * getReturnContent
+     *
+     * takes contents of response as string and returns associative array
+     *
+     * @param string $responseContents
+     */
+    private static function getReturnContent($responseContents)
+    {
+        $htmlString = htmlentities($responseContents);
+        $formattedHtml = html_entity_decode($htmlString);
+        $output = json_decode($formattedHtml, true);
+        return $output;
+    }
+
+    /*
      * adds file to local IPFS node by absolute path
      *
      * @param string $objectPath /path/to/local/file
@@ -79,10 +94,7 @@ class Ipfs
                 'w' => $w
             ]
         ]);
-        $htmlString = htmlentities($response->getBody()->getContents());
-        $formattedHtml = html_entity_decode($htmlString);
-        $output = json_decode($formattedHtml, true);
-        return $output;
+        return self::getReturnContent($response->getBody()->getContents());
     }
 
     /*
@@ -1017,7 +1029,7 @@ class Ipfs
                 'arg1' => $hash
             ]
         ]);
-        $output = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
+        $output = json_decode($response->getBody()->getContents(), true);
         return $output;
     }
 
@@ -1088,6 +1100,7 @@ class Ipfs
         $response = $client->request('POST', 'version');
         $output = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
 
-        return $output['Version'];
+        return $output;
     }
 }
+?>

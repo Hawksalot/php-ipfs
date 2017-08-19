@@ -3,9 +3,9 @@
 use PHPUnit\Framework\TestCase;
 use PhpIpfs\Ipfs;
 
-class IpfsTest extends TestCase
+class AddTest extends TestCase
 {
-    public function testAdd()
+    public function testDefaultAdd()
     {
         $testResponse = Ipfs::add('tests/testFiles/test.txt');
         $expectedResponse = [
@@ -15,3 +15,4 @@ class IpfsTest extends TestCase
         $this->assertEquals($testResponse, $expectedResponse);
     }
 }
+?>
