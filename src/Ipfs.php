@@ -1715,19 +1715,11 @@ class Ipfs
     }
 
     /*
-     * swarm/filters
-     */
-    public static function swarmFilters()
-    {
-        $client = self::setClient();
-        $response = $client->request('POST', 'swarm/filters');
-        return self::getReturnContent($response->getBody()->getContents());
-    }
-
-    /*
      * swarm/filters/add
      *
-     * @param string $address address to add to filter list in format (/ip4/$ip/ipcidr/16)?
+     * add an address filter
+     *
+     * @param string $address multiaddr to add to filter list. Ex. format (/ip4/$ip/ipcidr/16)?
      */
     public static function swarmFiltersAdd($address)
     {
@@ -1743,7 +1735,9 @@ class Ipfs
     /*
      * swarm/filters/rm
      *
-     * @param string $address address to add to filter list in format (/ip4/$ip/ipcidr/16)?
+     * remove an address filter
+     *
+     * @param string $address multiaddr to add to filter list. Ex. format (/ip4/$ip/ipcidr/16)?
      */
     public static function swarmFiltersRm($address)
     {
@@ -1759,24 +1753,32 @@ class Ipfs
     /*
      * swarm/peers
      *
+     * list peers with an open connection
+     *
      * @param boolean $verbose also display latency along with peer info
+     * @param boolean $streams also list information about open streams for each peer
+     * @param boolean $latency also list information about latency to each peer
      */
-    public static function swarmPeers($verbose = false)
+    public static function swarmPeers($verbose = false, $streams = false, $latency = false)
     {
         $client = self::setClient();
         $response = $client->request('POST', 'swarm/peers', [
             'query' => [
-                'v' => $verbose
+                'verbose' => $verbose,
+                'streams' => $streams,
+                'latency' => $latency
             ]
         ]);
         return self::getReturnContent($response->getBody()->getContents());
     }
 
     /*
-    * tar/add
-    *
-    * @param string $tarPath /path/to/tar
-    */
+     * tar/add
+     *
+     * import a tar file into IPFS
+     *
+     * @param string $tarPath /path/to/tar
+     */
     public static function tarAdd($tarPath)
     {
         $client = self::setClient();
@@ -1793,6 +1795,8 @@ class Ipfs
     /*
      * tar/cat
      *
+     * export a tar file from IPFS
+     *
      * @param string $tarHash IPFS object that is a tar
      */
     public static function tarCat($tarHash)
@@ -1807,23 +1811,9 @@ class Ipfs
     }
 
     /*
-     * tour
-     *
-     * @param string $section tour section to go to
-     */
-    public static function tour($section)
-    {
-        $client = self::setClient();
-        $response = $client->request('POST', 'tour', [
-            'query' => [
-                'arg' => $section
-            ]
-        ]);
-        return self::getReturnContent($response->getBody()->getContents());
-    }
-
-    /*
      * tour/list
+     *
+     * show a list of IPFS tour topics
      */
     public static function tourList()
     {
@@ -1834,6 +1824,8 @@ class Ipfs
 
     /*
      * tour/next
+     *
+     * show the next IPFS tour topic
      */
     public static function tourNext()
     {
@@ -1844,6 +1836,8 @@ class Ipfs
 
     /*
      * tour/restart
+     *
+     * restart the IPFS tour
      */
     public static function tourRestart()
     {
@@ -1853,14 +1847,42 @@ class Ipfs
     }
 
     /*
-     * queries local ipfs node for ipfs version
+     * update
+     *
+     * updates IPFS
+     *
+     * @param string $submcds arguments for subcommands
+     */
+    public static function update(...$subcmds)
+    {
+        $client = self::setClient();
+        // @todo take multiple arguments and dynamically generate request
+        return self::getReturnContent($response->getBody()->getContents());
+    }
+
+    /*
+     * version
+     *
+     * show ipfs version information
+     *
+     * @param boolean $number only show the version number
+     * @param boolean $commit show the commit hash
+     * @param boolean $repo show repo version
+     * @param boolean $all show all version information
      *
      * @return string indicates ipfs version running on queried ipfs node
      */
-    public static function version()
+    public static function version($number = false, $commit = false, $repo = false, $all = false)
     {
         $client = self::setClient();
-        $response = $client->request('POST', 'version');
+        $response = $client->request('POST', 'version', [
+            'query' => [
+                'number' => $number,
+                'commit' => $commit,
+                'repo' => $repo,
+                'all' => $all
+            ]
+        ]);
         return self::getReturnContent($response->getBody()->getContents());
     }
 }
