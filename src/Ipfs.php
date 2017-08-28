@@ -1568,6 +1568,8 @@ class Ipfs
 
     /*
      * repo/verify
+     *
+     * verify all blocks in repo are not corrupted
      */
     public static function repoVerify()
     {
@@ -1578,6 +1580,8 @@ class Ipfs
 
     /*
      * repo/version
+     *
+     * show the repo version
      */
     public static function repoVersion()
     {
@@ -1588,6 +1592,8 @@ class Ipfs
 
     /*
      * resolve
+     *
+     * resolve the value of names in IPFS
      *
      * @param string $hash IPFS object to resolve
      * @param boolean $recursive resolve until the result is a (direct?) object
@@ -1606,6 +1612,8 @@ class Ipfs
 
     /*
      * stats/bitswap
+     *
+     * show some diagnostic information on the bitswap agent
      */
     public static function statsBitswap()
     {
@@ -1621,26 +1629,16 @@ class Ipfs
      *
      * @param string $peer peer id
      * @param string $proto protocol to print bw stats for
-     *
-     * @todo implement poll and interval
+     * @param boolean $poll print bandwidth at an interval
+     * @param string $interval time interval to wait between updating output if poll is true
      *
      * @return array
      */
     public static function statsBw($peer = null, $proto = null, $poll = false, $interval = '1s')
     {
         $client = self::setClient();
-        /*
-         * this response returns an assoc array with 4 pairs
-         * of key/values but they may not need to be accurate
-         */
-        $response = $client->request('POST', 'stats/bw', [
-            'query' => [
-                'peer' => $peer,
-                'proto' => $proto,
-                //'poll' => true,
-                //'interval' => $interval
-            ]
-        ]);
+        // @todo dynamically generate request with peer or protocol
+        // @todo must run with no arguments or with either but not both
         return self::getReturnContent($response->getBody()->getContents());
     }
 
@@ -1663,17 +1661,9 @@ class Ipfs
     }
 
     /*
-     * swarm/addrs
-     */
-    public static function swarmAddrs()
-    {
-        $client = self::setClient();
-        $response = $client->request('POST', 'swarm/addrs');
-        return self::getReturnContent($response->getBody()->getContents());
-    }
-
-    /*
      * swarm/addrs/local
+     *
+     * list local addresses
      *
      * @param boolean $id show peer ID in addresses
      */
@@ -1691,6 +1681,8 @@ class Ipfs
     /*
      * swarm/connect
      *
+     * open connection to a given address
+     *
      * @param string $peerID peer to connect to in /ip4/$ip/tcp/$port/ipfs/$hash format
      */
     public static function swarmConnect($peerID)
@@ -1706,6 +1698,8 @@ class Ipfs
 
     /*
      * swarm/disconnect
+     *
+     * close connection to an address specified by $peerID
      *
      * param string $peerID peer to connect to in /ip4/$ip/tcp/$port/ipfs/$hash format
      */
