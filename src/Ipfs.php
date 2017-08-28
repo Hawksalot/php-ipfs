@@ -863,52 +863,141 @@ class Ipfs
     }
 
     /*
+     * filestore/dups
+     *
+     * list blocks that are both in the filestore and standard block storage
+     */
+    public static function filestoreDups()
+    {
+        $client = self::setClient();
+        $response = $client->request('POST', 'filestore/dups');
+        return self::getReturnContent($response->getBody()->getContents());
+    }
+
+    /*
+     * filestore/ls
+     *
+     * list objects in filestore
+     *
+     * @param string $object CID of object to list
+     */
+    public static function filestoreLs($object = false)
+    {
+        $client = self::setClient();
+        $response = $client->request('POST', 'filestore/ls', [
+            'query' => [
+                'arg' => $object
+            ]
+        ]);
+        return self::getReturnContent($response->getBody()->getContents());
+    }
+
+    /*
+     * filestore/verify
+     *
+     * verify objects in filestore
+     *
+     * @param string $object CID of object to verify
+     */
+    public static function filestoreVerify($object = false)
+    {
+        $client = self::setClient();
+        $response = $client->request('POST', 'filestore/verify', [
+            'query' => [
+                'arg' => $object
+            ]
+        ]);
+        return self::getReturnContent($response->getBody()->getContents());
+    }
+
+    /*
      * get
      *
+     * download IPFS object
+     *
      * @param string $hash IPFS hash to output data from
+     * @param string $localLocation the path to where the output should be stored
      * @param boolean $tar output tar
      * @param boolean $gzip output gzip
      * @param number $compression level of compression from 0-9
      */
-    public static function get($hash, $tar = false, $gzip = false, $compression = -1)
+    public static function get($hash, $localLocation = false, $tar = false, $gzip = false, $compression = -1)
     {
         $client = self::setClient();
         $response = $client->request('POST','get', [
             'query' => [
                 'arg' => $hash,
+                'output' => $localLocation,
                 'archive' => $tar,
                 'compress' => $gzip,
                 'compression' => $compression
             ]
         ]);
-        $output = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
-        return $output;
+        return self::getReturnContent($response->getBody()->getContents());
     }
 
     /*
      * id
      *
-     * @param string $peerID hash peerID of node to look up. If blank, outputs local ID
+     * @param string $peerID hash peerID of node to look up
+     * @param string $format optional output format
      */
-    public static function id($peerID = "default")
+    public static function id($peerID = false, $format = false)
     {
         $client = self::setClient();
-        if($peerID === "default")
-        {
-            $selfInfo = shell_exec('ipfs id');
-            $peerID = $selfInfo['ID'];
-        }
         $response = $client->request('POST', 'id', [
             'query' => [
-                'arg' => $peerID
+                'arg' => $peerID,
+                'format' => $format
             ]
         ]);
-        $output = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
-        return $output;
+        return self::getReturnContent($response->getBody()->getContents());
+    }
+
+    /*
+     * key/gen
+     *
+     * create a new keypair
+     *
+     * @param string $keyName name of key to create
+     * @param string $type type of the key to create. Possible values: rsa, ed25519
+     * @param number $size size of the key to create
+     */
+    public static function keyGen($keyName, $type = false, $size = false)
+    {
+        $client = self::setClient();
+        $response = $client->request('POST', 'key/gen', [
+            'query' => [
+                'arg' => $keyName,
+                'type' => $type,
+                'size' => $size
+            ]
+        ]);
+        return self::getReturnContent($response->getBody()->getContents());
+    }
+
+    /*
+     * key/list
+     *
+     * list all local keypairs
+     *
+     * @param boolean $verbose show extra information about keys
+     */
+    public static function keyList($verbose)
+    {
+        $client = self::setClient();
+        $response = $client->request('POST', 'key/list', [
+            'query' => [
+                'l' => $verbose
+            ]
+        ]);
+        return self::getReturnContent($response->getBody()->getContents());
     }
 
     /*
      * log/level
+     *
+     * change the logging level
      *
      * @param string $system which subsystem to output logging identifiers for. bitswap/blockstore/dht/merkledag/all
      * @param string $debugLevel what level of debugging to use. critical/error/warning/notice/info/debug
@@ -922,79 +1011,105 @@ class Ipfs
                 'arg2' => $debugLevel
             ]
         ]);
-        $output = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
-        return $output;
+        return self::getReturnContent($response->getBody()->getContents());
     }
 
     /*
      * log/ls
+     *
+     * list the logging subsystems
      */
     public static function logLs()
     {
         $client = self::setClient();
         $response = $client->request('POST', 'log/ls');
-        $output = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
-        return $output;
+        return self::getReturnContent($response->getBody()->getContents());
     }
 
     /*
      * log/tail
+     *
+     * read the event log
      */
     public static function logTail()
     {
         $client = self::setClient();
         $response = $client->request('POST', 'log/tail');
-        $output = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
-        return $output;
+        return self::getReturnContent($response->getBody()->getContents());
     }
 
     /*
      * ls
      *
+     * list directory contents for Unix filesystem objects
+     *
      * @param string $hash IPFS content hash
+     * @param boolean $headers print table headers
      * @param boolean $resolve resolve linked objects to find out their types
      */
-    public static function ls($hash, $resolve = true)
+    public static function ls($hash, $headers = false, $resolve = true)
     {
         $client = self::setClient();
         $response = $client->request('POST', 'ls', [
             'query' => [
                 'arg' => $hash,
+                'headers' => $headers,
                 'resolve' => $resolve
             ]
         ]);
-        $output = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
-        return $output;
+        return self::getReturnContent($response->getBody()->getContents());
+    }
+
+    /*
+     * mount
+     *
+     * mounts IPFS to the filesystem
+     *
+     * @param string $ipfsMountPath /path/to/ipfs/mount/point
+     * @param string $ipnsMountPath /path/to/ipns/mount/point
+     */
+    public static function mount($ipfsMountPath, $ipnsMountPath)
+    {
+        $client = self::setClient();
+        $response = $client->request('POST', 'mount', [
+            'query' => [
+                'ipfs-path' => $ipfsMountPath,
+                'ipns-path' => $ipnsMountPath
+            ]
+        ]);
+        return self::getReturnContent($response->getBody()->getContents());
     }
 
     /*
      * name/publish
      *
+     * publish IPNS names
+     *
      * @param string $hash IPFS path of the object to be published
      * @param boolean $resolve resolve given path before publishing
      * @param time $lifetime time duration that the record will be valid
-     * @param time $ttl time duration this record should be cached for. EXPERIMENTAL AND NOT INCLUDED
+     * @param string $ttl time duration this record should be cached for
+     * @param string $key name of the key to be used as listed by key list
      */
-    public static function namePublish($hash, $resolve = true, $lifetime = '24h')
+    public static function namePublish($hash, $resolve = true, $lifetime = false, $ttl = false, $key = false)
     {
         $client = self::setClient();
-        if(!$hash)
-        {
-            $hash = self::id()['PublicKey'];
-        }
         $response = $client->request('POST', 'name/publish', [
             'query' => [
                 'arg' => $hash,
                 'resolve' => $resolve,
-                'lifetime' => $lifetime
+                'lifetime' => $lifetime,
+                'ttl' => $ttl,
+                'key' => $key
             ]
         ]);
-        $output = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
-        return $output;
+        return self::getReturnContent($response->getBody()->getContents());
     }
 
     /*
      * name/resolve
+     *
+     * resolve IPNS names
      *
      * @param string $hash IPNS hash to resolve
      * @param boolean $recursive resolve until the result is not an IPNS name
@@ -1010,12 +1125,13 @@ class Ipfs
                 'nocache' => $nocache
             ]
         ]);
-        $output = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
-        return $output;
+        return self::getReturnContent($response->getBody()->getContents());
     }
 
     /*
      * object/data
+     *
+     * output the raw bytes of an IPFS object
      *
      * @param string $hash key of the object to retrieve
      */
@@ -1027,109 +1143,91 @@ class Ipfs
                 'arg' => $hash
             ]
         ]);
-        $output = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
-        return $output;
+        return self::getReturnContent($response->getBody()->getContents());
     }
 
     /*
      * object/diff
      *
+     * display the differences between 2 IPFS objects
+     *
      * @param string $hash1 hash of object to diff against
      * @param string $hash2 hash of object to diff
+     * @param boolean $verbose print extra information
      */
-    public static function objectDiff($hash1, $hash2)
+    public static function objectDiff($hash1, $hash2, $verbose = false)
     {
         $client = self::setClient();
         $response = $client->request('POST', 'object/diff', [
             'query' => [
                 'arg1' => $hash1,
-                'arg2' => $hash2
+                'arg2' => $hash2,
+                'verbose' => $verbose
             ]
         ]);
-        $output = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
-        return $output;
+        return self::getReturnContent($response->getBody()->getContents());
     }
 
     /*
      * object/get
      *
+     * get and serialize the DAG node named by $hash
+     *
      * @param string $hash key of the object to retrieve
-     * @param string $encoding serializes the DAG node to the format specified. Possible values: json, protobuf, xml
      */
-    public static function objectGet($hash, $encoding = 'json')
+    public static function objectGet($hash)
     {
         $client = self::setClient();
         $response = $client->request('POST', 'object/get', [
             'query' => [
-                'arg' => $hash,
-                'encoding' => $encoding
+                'arg' => $hash
             ]
         ]);
-        $output = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
-        return $output;
+        return self::getReturnContent($response->getBody()->getContents());
     }
 
     /*
      * object/links
      *
+     * output the links pointed to by the object specified by $hash
+     *
      * @param string $hash key of the object to retrieve
+     * @param boolean $headers print table headers (hash, size, name)
      */
-    public static function objectLinks($hash)
+    public static function objectLinks($hash, $headers = false)
     {
         $client = self::setClient();
         $response = $client->request('POST', 'object/links', [
             'query' => [
-                'arg' => $hash
+                'arg' => $hash,
+                'headers' => $headers
             ]
         ]);
-        $output = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
-        return $output;
+        return self::getReturnContent($response->getBody()->getContents());
     }
 
     /*
      * object/new
      *
-     * @param $template template to use. Only possible value is unixfs (untested)
+     * create a new object from an IPFS template
+     *
+     * @param $template template to use
      */
     public static function objectNew($template = 'unixfs')
     {
         $client = self::setClient();
         $response = $client->request('POST', 'object/new', [
             'query' => [
-                'template' => $template
+                'arg' => $template
             ]
         ]);
-        $output = \GuzzleHttp\json_decode($response->getBody()->getContents(), true);
-        return $output;
-    }
-
-    /*
-     * object/patch/append-data
-     *
-     * @param string $hash hash of the object to modify
-     * @param string $dataPath path to data to append
-     */
-    public static function objectPatchAppendData($hash, $dataPath)
-    {
-        $client = self::setClient();
-        $response = $client->request('POST', 'object/patch/append-data', [
-            'multipart' => [
-                [
-                    'Content-Type' => 'multipart/formdata',
-                    'name' => 'data_to_append_to_object',
-                    'contents' => fopen(realpath($dataPath), "r")
-                ]
-            ],
-            'query' => [
-                'arg1' => $hash
-            ]
-        ]);
-        $output = json_decode($response->getBody()->getContents(), true);
-        return $output;
+        return self::getReturnContent($response->getBody()->getContents());
     }
 
     /*
      * object/patch/add-link
+     *
+     * add a link to a given object
      *
      * @param string $node hash of the node to modify
      * @param string $name name of link to create
@@ -1151,7 +1249,35 @@ class Ipfs
     }
 
     /*
+     * object/patch/append-data
+     *
+     * append data to the data segment of a DAG node
+     *
+     * @param string $hash hash of the object to modify
+     * @param string $dataPath path to data to append
+     */
+    public static function objectPatchAppendData($hash, $dataPath)
+    {
+        $client = self::setClient();
+        $response = $client->request('POST', 'object/patch/append-data', [
+            'multipart' => [
+                [
+                    'Content-Type' => 'multipart/formdata',
+                    'name' => 'data_to_append_to_object',
+                    'contents' => fopen(realpath($dataPath), "r")
+                ]
+            ],
+            'query' => [
+                'arg1' => $hash
+            ]
+        ]);
+        return self::getReturnContent($response->getBody()->getContents());
+    }
+
+    /*
      * object/patch/rm-link
+     *
+     * remove a link from an object
      *
      * @param string $node hash of the node to modify
      * @param string $name name of the link to remove
@@ -1171,6 +1297,8 @@ class Ipfs
     /*
      * object/patch/set-data
      *
+     * set the data field of an IPFS object
+     *
      * @param string $node hash of the node to modify
      * @param string $dataPath data to set the object to
      */
@@ -1184,7 +1312,7 @@ class Ipfs
                 'contents' => fopen(realpath($dataPath), "r")
             ],
             'query' => [
-                'arg1' => $node
+                'arg' => $node
             ]
         ]);
         return self::getReturnContent($response->getBody()->getContents());
@@ -1192,6 +1320,8 @@ class Ipfs
 
     /*
      * object/put
+     *
+     * store input as a DAG object, print its key
      *
      * @param string $dataPath data to be stored as a DAG object
      * @param string $encoding encoding type of input data. Possible values: protobuf, json
@@ -1215,6 +1345,8 @@ class Ipfs
     /*
      * object/stat
      *
+     * get stats for the DAG node named by $hash
+     *
      * @param string $hash key of the object to retreieve
      */
     public static function objectStat($hash)
@@ -1231,16 +1363,20 @@ class Ipfs
     /*
      * pin/add
      *
+     * pin object to local storage
+     *
      * @param string $hash object to pin
      * @param boolean $recursive recursively pin the objects linked to by the specified object
+     * @param boolean $progress show progress
      */
-    public static function pinAdd($hash, $recursive = true)
+    public static function pinAdd($hash, $recursive = true, $progress = false)
     {
         $client = self::setClient();
         $response = $client->request('POST', 'pin/add', [
             'query' => [
                 'arg' => $hash,
-                'recursive' => $recursive
+                'recursive' => $recursive,
+                'progress' => $progress
             ]
         ]);
         return self::getReturnContent($response->getBody()->getContents());
@@ -1249,17 +1385,17 @@ class Ipfs
     /*
      * pin/ls
      *
-     * @param string $type type of pinned keys to list. Possible values: all, direct, indirect, recursive @todo check that these are the only possible values
-     * @param boolean $count show reference count when listing indirect pins
+     * @param string $hash path to object to be listed
+     * @param string $type type of pinned keys to list. Possible values: all, direct, indirect, recursive
      * @param boolean $quiet write just hashes of objects
      */
-    public static function pinLs($type = 'all', $count = false, $quiet = false)
+    public static function pinLs($hash, $type = 'all', $quiet = false)
     {
         $client = self::setClient();
         $response = $client->request('POST', 'pin/ls', [
             'query' => [
+                'arg' => $hash,
                 'type' => $type,
-                'count' => $count,
                 'quiet' => $quiet
             ]
         ]);
@@ -1268,6 +1404,8 @@ class Ipfs
 
     /*
      * pin/rm
+     *
+     * remove pinned object from local storage
      *
      * @param string $hash IPFS object to be unpinned
      * @param boolean $recursive recursively unpin linked objects
@@ -1287,6 +1425,8 @@ class Ipfs
     /*
      * ping
      *
+     * send echo request packets to IPFS hosts
+     *
      * @param string $peer hash of peer to ping
      * @param number $count number of ping messages to send
      */
@@ -1296,30 +1436,86 @@ class Ipfs
         $response = $client->request('POST', 'ping', [
             'query' => [
                 'arg' => $peer,
-                'n' => $count
+                'count' => $count
             ]
         ]);
         return self::getReturnContent($response->getBody()->getContents());
     }
 
     /*
-     * refs
+     * pubsub/ls
      *
-     * @param string $hash IPFS object(s) to list references for
-     * @param string $format emit edges with given format. Possible values: src, dst, linkname
-     * @param boolean $edges emit edge format from -> to
-     * @param boolean $unique omit duplicate refs from output
-     * @param boolean $recursive recursively list links of child nodes
+     * list subscribed topics by name
      */
-    public static function refs($hash, $format = 'dst', $edges = false, $unique = false, $recursive = false)
+    public static function pubsubLS()
     {
         $client = self::setClient();
-        // @todo construct query for options
-        return self::getReturnContent($respones->getBody()->getContents());
+        $response = $client->request('POST', 'pubsub/ls');
+        return self::getReturnContent($response->getBody()->getContents());
+    }
+
+    /*
+     * pubsub/peers
+     *
+     * list peers the local node is currently pubsubbing with
+     *
+     * @param string $topic topic to list connected peers of
+     */
+    public static function pubsubPeers($topic = false)
+    {
+        $client = self::setClient();
+        $response = $client->request('POST', 'pubsub/peers', [
+            'query' => [
+                'arg' => $topic
+            ]
+        ]);
+        return self::getReturnContent($response->getBody()->getContents());
+    }
+
+    /*
+     * pubsub/pub
+     *
+     * publish a message to a given pubsub topic
+     *
+     * @param string $topic topic to publish to
+     * @param string $message payload of message
+     */
+    public static function pubsubPub($topic, $message)
+    {
+        $client = self::setClient();
+        $response = $client->request('POST', 'pubsub/pub', [
+            'query' => [
+                'arg1' => $topic,
+                'arg2' => $message
+            ]
+        ]);
+        return self::getReturnContent($response->getBody()->getContents());
+    }
+
+    /*
+     * pubsub/sub
+     *
+     * subscribe to messages on a given topic
+     *
+     * @param string $topic name of topic to subscribe to
+     * @param boolean $discover try to discover other peers subscribed to the same topic
+     */
+    public static function pubsubSub($topic, $discover = false)
+    {
+        $client = self::setClient();
+        $response = $client->request('POST', 'pubsub/sub', [
+            'query' = [
+                'arg' => $topic,
+                'discover' => $discover
+            ]
+        ]);
+        return self::getReturnContent($response->getBody()->getContents());
     }
 
     /*
      * refs/local
+     *
+     * list all local references
      */
     public static function refsLocal()
     {
@@ -1330,6 +1526,8 @@ class Ipfs
 
     /*
      * repo/fsck
+     *
+     * remove repo lockfiles
      */
     public static function repoFsck()
     {

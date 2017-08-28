@@ -1,5 +1,5 @@
 # PHP-IPFS
-WARNING: This is a WIP. Code duplication and untested code abounds
+WARNING: This is a WIP. Very little testing and an API that may change unpredictably
 ## Getting Started
 ### Installing
 // TODO
