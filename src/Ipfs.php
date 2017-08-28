@@ -1538,11 +1538,19 @@ class Ipfs
 
     /*
      * repo/gc
+     *
+     * perform a garbage collection sweep on the repo
+     *
+     * @param boolean $errors stream errors
      */
-    public static function repoGc()
+    public static function repoGc($errors = false)
     {
         $client = self::setClient();
-        $response = $client->request('POST', 'repo/gc');
+        $response = $client->request('POST', 'repo/gc', [
+            'query' => [
+                'stream-errors' => $errors
+            ]
+        ]);
         return self::getReturnContent($response->getBody()->getContents());
     }
 
