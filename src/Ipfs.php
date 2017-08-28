@@ -1556,10 +1556,14 @@ class Ipfs
 
     /*
      * repo/stat
+     *
+     * get stats for the currently used repo
+     *
+     * @param boolean $human output repo size in MiB
      */
-    public static function repoStat()
+    public static function repoStat($human = false)
     {
-        return self::statsRepo();
+        return self::statsRepo($human);
     }
 
     /*
@@ -1642,11 +1646,19 @@ class Ipfs
 
     /*
      * stats/repo
+     *
+     * get stats for the currently used repo
+     *
+     * @param boolean $human output repo size in MiB
      */
-    public static function statsRepo()
+    public static function statsRepo($human = false)
     {
         $client = self::setClient();
-        $response = $client->request('POST', 'stats/repo');
+        $response = $client->request('POST', 'stats/repo', [
+            'query' => [
+                'human' => $human
+            ]
+        ]);
         return self::getReturnContent($response->getBody()->getContents());
     }
 
