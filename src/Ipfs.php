@@ -753,7 +753,7 @@ class Ipfs
  * @param number $offset byte offset to begin reading from
  * @param number $count maximum number of bytes to read
  */
-    public static function filesRead($apiFilePath, $offset = 0, $count = false
+    public static function filesRead($apiFilePath, $offset = 0, $count = false)
     {
         $client = self::setClient();
         if($count !== false)
@@ -1504,7 +1504,7 @@ class Ipfs
     {
         $client = self::setClient();
         $response = $client->request('POST', 'pubsub/sub', [
-            'query' = [
+            'query' => [
                 'arg' => $topic,
                 'discover' => $discover
             ]
@@ -1857,7 +1857,7 @@ class Ipfs
     {
         $client = self::setClient();
         // @todo take multiple arguments and dynamically generate request
-        return self::getReturnContent($response->getBody()->getContents());
+        return 'This is not implemented. Please run "ipfs update" with flags on your command line instead.';
     }
 
     /*

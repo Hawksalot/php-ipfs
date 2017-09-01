@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<testsuites>
-  <testsuite name="basic" tests="1" assertions="1" errors="0" failures="0" skipped="0" time="0.064250">
-    <testsuite name="AddTest" file="/home/owl/Projects/php/php-ipfs/tests/AddTest.php" tests="1" assertions="1" errors="0" failures="0" skipped="0" time="0.064250">
-      <testcase name="testDefaultAdd" class="AddTest" classname="AddTest" file="/home/owl/Projects/php/php-ipfs/tests/AddTest.php" line="8" assertions="1" time="0.064250"/>
-    </testsuite>
-  </testsuite>
-</testsuites>
