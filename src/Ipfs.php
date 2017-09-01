@@ -81,7 +81,7 @@ class Ipfs
      *
      * adds file or directory to local IPFS node
      *
-     * @param string $objectPatch /path/to/local/file
+     * @param string $objectPath /path/to/local/file
      * @param boolean $hidden Hidden. Include files that are hidden. Only takes effect on recursive add
      * @param boolean $onlyHash Only-hash. Only chunk and hash - do not write to disk. can be tested by running ipfs pin ls (I think)
      * @param boolean $progress Progress. Stream progress data. TEMPORARILY SET TO ALWAYS FALSE
@@ -1869,8 +1869,6 @@ class Ipfs
      * @param boolean $commit show the commit hash
      * @param boolean $repo show repo version
      * @param boolean $all show all version information
-     *
-     * @return string indicates ipfs version running on queried ipfs node
      */
     public static function version($number = false, $commit = false, $repo = false, $all = false)
     {

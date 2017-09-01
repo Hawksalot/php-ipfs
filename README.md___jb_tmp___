@@ -4,6 +4,7 @@
 - PHP >=7.1
 - IPFS >=0.4.10
 - [Composer](https://getcomposer.org/doc/00-intro.md)
+
 ### Installing
 Install from Packagist:
 ```
