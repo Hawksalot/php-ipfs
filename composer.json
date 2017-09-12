@@ -3,7 +3,6 @@
     "description": "php interface for Go-IPFS HTTP API functions",
     "version": "0.1.0",
     "license": "MIT",
-    "type": "composer-plugin",
     "require": {
         "guzzlehttp/guzzle": "^6.3"
     },
