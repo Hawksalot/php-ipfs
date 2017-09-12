@@ -8,7 +8,7 @@
 ### Installing
 Install from Packagist:
 ```
-composer require "hawksalot/php-ipfs":"dev-master"
+composer require hawksalot/php-ipfs
 ```
 ### How to Use
 To use an API function, call it using camel case.
