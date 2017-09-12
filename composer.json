@@ -1,7 +1,19 @@
 {
     "name": "hawksalot/php-ipfs",
     "description": "php interface for Go-IPFS HTTP API functions",
+    "keywords": [
+        "ipfs",
+        "distributed"
+    ],
     "license": "MIT",
+    "authors": [
+        {
+            "name": "Brandon Petkov",
+            "email": "bpetkov13@gmail.com",
+            "homepage": "hawksalot.github.io",
+            "role": "Developer"
+        }
+    ],
     "require": {
         "guzzlehttp/guzzle": "^6.3"
     },
