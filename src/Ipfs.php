@@ -70,7 +70,7 @@ class Ipfs
      */
     private static function getReturnContent($responseContents)
     {
-        $htmlString = htmlentities($response->getBody()Contents);
+        $htmlString = htmlentities($responseContents);
         $formattedHtml = html_entity_decode($htmlString);
         $output = json_decode($formattedHtml, true);
         return $output;
