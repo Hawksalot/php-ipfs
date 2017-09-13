@@ -149,7 +149,9 @@ class Ipfs
      *
      * remove a given block from your wantlist
      *
-     * @param string $hash
+     * @param string $hash hash of block to remove from wantlist
+     *
+     * @return string $output plaintext response body
      */
     public static function bitswapUnwant(...$hash)
     {
@@ -162,7 +164,8 @@ class Ipfs
                 ]
             ]);
         }
-        return self::getReturnContent($response->getBody()->getContents());
+        $output = htmlentities($response);
+        return $output;
     }
 
     /*
@@ -187,6 +190,8 @@ class Ipfs
      * get a raw IPFS block
      *
      * @param string $hash the b58 multihash of an existing block to get
+     *
+     * @return string $output plaintext response body
      */
     public static function blockGet($hash)
     {
@@ -196,7 +201,8 @@ class Ipfs
                 'arg' => $hash
             ]
         ]);
-        return self::getReturnContent($response->getBody()->getContents());
+        $output = htmlentities($response);
+        return $output;
     }
 
     /*
@@ -310,6 +316,8 @@ class Ipfs
      * show IPFS object data
      *
      * @param string $hash the hash of the IPFS content to be pulled
+     *
+     * @return string $output plaintext response body
      */
     public static function cat($hash)
     {
@@ -319,7 +327,8 @@ class Ipfs
                 'arg' => $hash
             ]
         ]);
-        return self::getReturnContent($response->getBody()->getContents());
+        $output = htmlentities($response);
+        return $output;
     }
 
     /*
@@ -346,6 +355,8 @@ class Ipfs
      * replace config with local file
      *
      * @param string $configFilePath local location of new config file
+     *
+     * @return string $output plaintext response body
      */
     public static function configReplace($configFilePath)
     {
@@ -359,19 +370,23 @@ class Ipfs
                 ]
             ]
         ]);
-        return self::getReturnContent($response->getBody()->getContents());
+        $output = htmlentities($response);
+        return $output;
     }
 
     /*
      * config/show
      *
      * output config file contents
+     *
+     * @return string $output plaintext response body
      */
     public static function configShow()
     {
         $client = self::setClient();
         $response = $client->request('POST', 'config/show');
-        return self::getReturnContent($response->getBody()->getContents());
+        $output = htmlentities($response);
+        return $output;
     }
 
     /*
@@ -379,7 +394,9 @@ class Ipfs
      *
      * get a DAG node from IPFS
      *
-     * $param string $hash the object to get
+     * @param string $hash the object to get
+     *
+     * @return string $output plaintext response body
      */
     public static function dagGet($hash)
     {
@@ -389,7 +406,8 @@ class Ipfs
                 'arg' => $hash
             ]
         ]);
-        return self::getReturnContent($response->getBody()->getContents());
+        $output = htmlentities($response);
+        return $output;
     }
 
     /*
@@ -554,12 +572,15 @@ class Ipfs
      * diag/cmds/clear
      *
      * clear inactive requests from the log
+     *
+     * @return string $output plaintext response body
      */
     public static function diagCmdsClear()
     {
         $client = self::setClient();
         $response = $client->request('POST', 'diag/cmds/clear');
-        return self::getReturnContent($response->getBody()->getContents());
+        $output = htmlentities($response);
+        return $output;
     }
 
     /*
@@ -568,6 +589,8 @@ class Ipfs
      * set how long to keep inactive requests in the log
      *
      * @param string $time time to keep inactive requests in log
+     *
+     * @return string $output plaintext response body
      */
     public static function diagCmdsSetTime($time)
     {
@@ -577,7 +600,8 @@ class Ipfs
                 'arg' => $time
             ]
         ]);
-        return self::getReturnContent($response->getBody()->getContents());
+        $output = htmlentities($response);
+        return $output;
     }
 
     /*
@@ -586,6 +610,8 @@ class Ipfs
      * generate a network diagnostics report
      *
      * @param string $format what format to use for output. Possible values: text, d3, dot
+     *
+     * @return string $output plaintext response body
      */
     public static function diagNet($format = 'text')
     {
@@ -595,19 +621,23 @@ class Ipfs
                 'vis' => $format
             ]
         ]);
-        return self::getReturnContent($response->getBody()->getContents());
+        $output = htmlentities($response);
+        return $output;
     }
 
     /*
      * diag/sys
      *
      * print system diagnostic information
+     *
+     * @return string $output plaintext response body
      */
     public static function diagSys()
     {
         $client = self::setClient();
         $response = $client->request('POST', 'diag/sys');
-        return self::getReturnContent($response->getBody()->getContents());
+        $output = htmlentities($response);
+        return $output;
     }
 
     /*
@@ -655,6 +685,8 @@ class Ipfs
      *
      * @param string $apiFilePath1 files api location source
      * @param string $apiFilePath2 files api location destination
+     *
+     * @return string $output plaintext response body
      */
     public static function filesCp($apiFilePath1, $apiFilePath2)
     {
@@ -665,7 +697,8 @@ class Ipfs
                 'arg2' => $apiFilePath2
             ]
         ]);
-        return self::getReturnContent($response->getBody()->getContents());
+        $output = htmlentities($response);
+        return $output;
     }
 
     /*
@@ -674,6 +707,8 @@ class Ipfs
      * flush a given path's data to disk
      *
      * @param string $apiFilePath path to flush
+     *
+     * @return string $output plaintext response body
      *
      * @todo check for difference in API action between no argument and empty argument
      */
@@ -685,7 +720,8 @@ class Ipfs
                 'arg' => $apiFilePath
             ]
         ]);
-        return self::getReturnContent($response->getBody()->getContents());
+        $output = htmlentities($response);
+        return $output;
     }
 
     /*
@@ -715,6 +751,8 @@ class Ipfs
      *
      * @param string $apiDirPath path to target directory
      * @param boolean $parents make parent directories if necessary
+     *
+     * @return string $output plaintext response body
      */
     public static function filesMkdir($apiDirPath, $parents = false)
     {
@@ -725,7 +763,8 @@ class Ipfs
                 'parents' => $parents
             ]
         ]);
-        return self::getReturnContent($response->getBody()->getContents());
+        $output = htmlentities($response);
+        return $output;
     }
 
     /*
@@ -733,6 +772,8 @@ class Ipfs
      *
      * @param string $apiFilePath1 files api location source
      * @param string $apiFilePath2 files api location destination
+     *
+     * @return string $output plaintext response body
      */
     public static function filesMv($apiFilePath1, $apiFilePath2)
     {
@@ -743,16 +784,19 @@ class Ipfs
                 'arg2' => $apiFilePath2
             ]
         ]);
-        return self::getReturnContent($response->getBody()->getContents());
+        $output = htmlentities($response);
+        return $output;
     }
 
     /*
- * files/read
- *
- * @param string $apiFilePath files api location to read
- * @param number $offset byte offset to begin reading from
- * @param number $count maximum number of bytes to read
- */
+     * files/read
+     *
+     * @param string $apiFilePath files api location to read
+     * @param number $offset byte offset to begin reading from
+     * @param number $count maximum number of bytes to read
+     *
+     * @return string $output plaintext response body
+     */
     public static function filesRead($apiFilePath, $offset = 0, $count = false)
     {
         $client = self::setClient();
@@ -775,7 +819,8 @@ class Ipfs
                 ]
             ]);
         }
-        return self::getReturnContent($response->getBody()->getContents());
+        $output = htmlentities($response);
+        return $output;
     }
 
     /*
@@ -783,6 +828,8 @@ class Ipfs
      *
      * @param string $apiFilePath file location in files API to remove
      * @param boolean $recursive recursively remove directories
+     *
+     * @return string $output plaintext response body
      */
     public static function filesRm($apiFilePath, $recursive = false)
     {
@@ -793,7 +840,8 @@ class Ipfs
                 'r' => $recursive
             ]
         ]);
-        return self::getReturnContent($response->getBody()->getContents());
+        $output = htmlentities($response);
+        return $output;
     }
 
     /*
@@ -830,6 +878,8 @@ class Ipfs
      * @param boolean $create create the file if it does not exist
      * @param boolean $truncate truncate the file to size zero before writing
      * @param boolean $flush flush target and ancestors after write
+     *
+     * @return string $output plaintext response body
      */
     public static function filesWrite($apiFilePath, $dataPath, $offset = 0, $count, $create = true, $truncate = false)
     {
@@ -859,7 +909,8 @@ class Ipfs
                 ]
             ]);
         }
-        return self::getReturnContent($response->getBody()->getContents());
+        $output = htmlentities($response);
+        return $output;
     }
 
     /*
@@ -920,6 +971,8 @@ class Ipfs
      * @param boolean $tar output tar
      * @param boolean $gzip output gzip
      * @param number $compression level of compression from 0-9
+     *
+     * @return string $output plaintext response body
      */
     public static function get($hash, $localLocation = false, $tar = false, $gzip = false, $compression = -1)
     {
@@ -933,7 +986,8 @@ class Ipfs
                 'compression' => $compression
             ]
         ]);
-        return self::getReturnContent($response->getBody()->getContents());
+        $output = htmlentities($response);
+        return $output;
     }
 
     /*
@@ -1030,12 +1084,15 @@ class Ipfs
      * log/tail
      *
      * read the event log
+     *
+     * @return string $output plaintext response body
      */
     public static function logTail()
     {
         $client = self::setClient();
         $response = $client->request('POST', 'log/tail');
-        return self::getReturnContent($response->getBody()->getContents());
+        $output = htmlentities($response);
+        return $output;
     }
 
     /*
@@ -1134,6 +1191,8 @@ class Ipfs
      * output the raw bytes of an IPFS object
      *
      * @param string $hash key of the object to retrieve
+     *
+     * @return string $output plaintext response body
      */
     public static function objectData($hash)
     {
@@ -1143,7 +1202,8 @@ class Ipfs
                 'arg' => $hash
             ]
         ]);
-        return self::getReturnContent($response->getBody()->getContents());
+        $output = htmlentities($response);
+        return $output;
     }
 
     /*
@@ -1479,6 +1539,8 @@ class Ipfs
      *
      * @param string $topic topic to publish to
      * @param string $message payload of message
+     *
+     * @return string $output plaintext response body
      */
     public static function pubsubPub($topic, $message)
     {
@@ -1489,7 +1551,8 @@ class Ipfs
                 'arg2' => $message
             ]
         ]);
-        return self::getReturnContent($response->getBody()->getContents());
+        $output = htmlentities($response);
+        return $output;
     }
 
     /*
@@ -1798,6 +1861,8 @@ class Ipfs
      * export a tar file from IPFS
      *
      * @param string $tarHash IPFS object that is a tar
+     *
+     * @return string $output plaintext response body
      */
     public static function tarCat($tarHash)
     {
@@ -1807,43 +1872,53 @@ class Ipfs
                 'arg' => $tarHash
             ]
         ]);
-        return self::getReturnContent($response->getBody()->getContents());
+        $output = htmlentities($response);
+        return $output;
     }
 
     /*
      * tour/list
      *
      * show a list of IPFS tour topics
+     *
+     * @return string $output plaintext response body
      */
     public static function tourList()
     {
         $client = self::setClient();
         $response = $client->request('POST', 'tour/list');
-        return self::getReturnContent($response->getBody()->getContents());
+        $output = htmlentities($response);
+        return $output;
     }
 
     /*
      * tour/next
      *
      * show the next IPFS tour topic
+     *
+     * @return string $output plaintext response body
      */
     public static function tourNext()
     {
         $client = self::setClient();
         $response = $client->request('POST', 'tour/next');
-        return self::getReturnContent($response->getBody()->getContents());
+        $output = htmlentities($response);
+        return $output;
     }
 
     /*
      * tour/restart
      *
      * restart the IPFS tour
+     *
+     * @return string $output plaintext response body
      */
     public static function tourRestart()
     {
         $client = self::setClient();
         $response = $client->request('POST', 'tour/restart');
-        return self::getReturnContent($response->getBody()->getContents());
+        $output = htmlentities($response);
+        return $output;
     }
 
     /*
@@ -1856,7 +1931,7 @@ class Ipfs
     public static function update(...$subcmds)
     {
         $client = self::setClient();
-        // @todo take multiple arguments and dynamically generate request
+        // @todo take multiple arguments, create string to pass as arg and dynamically generate request
         return 'This is not implemented. Please run "ipfs update" with flags on your command line instead.';
     }
 
