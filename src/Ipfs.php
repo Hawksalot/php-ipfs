@@ -164,7 +164,7 @@ class Ipfs
                 ]
             ]);
         }
-        $output = htmlentities($response->getBody());
+        $output = $response->getBody();
         return $output;
     }
 
@@ -201,7 +201,7 @@ class Ipfs
                 'arg' => $hash
             ]
         ]);
-        $output = htmlentities($response->getBody());
+        $output = $response->getBody();
         return $output;
     }
 
@@ -327,7 +327,7 @@ class Ipfs
                 'arg' => $hash
             ]
         ]);
-        $output = htmlentities($response->getBody());
+        $output = $response->getBody();
         return $output;
     }
 
@@ -370,7 +370,7 @@ class Ipfs
                 ]
             ]
         ]);
-        $output = htmlentities($response->getBody());
+        $output = $response->getBody();
         return $output;
     }
 
@@ -385,7 +385,7 @@ class Ipfs
     {
         $client = self::setClient();
         $response = $client->request('POST', 'config/show');
-        $output = htmlentities($response->getBody());
+        $output = $response->getBody();
         return $output;
     }
 
@@ -406,7 +406,7 @@ class Ipfs
                 'arg' => $hash
             ]
         ]);
-        $output = htmlentities($response->getBody());
+        $output = $response->getBody();
         return $output;
     }
 
@@ -579,7 +579,7 @@ class Ipfs
     {
         $client = self::setClient();
         $response = $client->request('POST', 'diag/cmds/clear');
-        $output = htmlentities($response->getBody());
+        $output = $response->getBody();
         return $output;
     }
 
@@ -600,7 +600,7 @@ class Ipfs
                 'arg' => $time
             ]
         ]);
-        $output = htmlentities($response->getBody());
+        $output = $response->getBody();
         return $output;
     }
 
@@ -621,7 +621,7 @@ class Ipfs
                 'vis' => $format
             ]
         ]);
-        $output = htmlentities($response->getBody());
+        $output = $response->getBody();
         return $output;
     }
 
@@ -636,7 +636,7 @@ class Ipfs
     {
         $client = self::setClient();
         $response = $client->request('POST', 'diag/sys');
-        $output = htmlentities($response->getBody());
+        $output = $response->getBody();
         return $output;
     }
 
@@ -697,7 +697,7 @@ class Ipfs
                 'arg2' => $apiFilePath2
             ]
         ]);
-        $output = htmlentities($response->getBody());
+        $output = $response->getBody();
         return $output;
     }
 
@@ -720,7 +720,7 @@ class Ipfs
                 'arg' => $apiFilePath
             ]
         ]);
-        $output = htmlentities($response->getBody());
+        $output = $response->getBody();
         return $output;
     }
 
@@ -763,7 +763,7 @@ class Ipfs
                 'parents' => $parents
             ]
         ]);
-        $output = htmlentities($response->getBody());
+        $output = $response->getBody();
         return $output;
     }
 
@@ -784,7 +784,7 @@ class Ipfs
                 'arg2' => $apiFilePath2
             ]
         ]);
-        $output = htmlentities($response->getBody());
+        $output = $response->getBody();
         return $output;
     }
 
@@ -819,7 +819,7 @@ class Ipfs
                 ]
             ]);
         }
-        $output = htmlentities($response->getBody());
+        $output = $response->getBody();
         return $output;
     }
 
@@ -840,7 +840,7 @@ class Ipfs
                 'r' => $recursive
             ]
         ]);
-        $output = htmlentities($response->getBody());
+        $output = $response->getBody();
         return $output;
     }
 
@@ -909,7 +909,7 @@ class Ipfs
                 ]
             ]);
         }
-        $output = htmlentities($response->getBody());
+        $output = $response->getBody();
         return $output;
     }
 
@@ -986,7 +986,7 @@ class Ipfs
                 'compression' => $compression
             ]
         ]);
-        $output = htmlentities($response->getBody());
+        $output = $response->getBody();
         return $output;
     }
 
@@ -1091,7 +1091,7 @@ class Ipfs
     {
         $client = self::setClient();
         $response = $client->request('POST', 'log/tail');
-        $output = htmlentities($response->getBody());
+        $output = $response->getBody();
         return $output;
     }
 
@@ -1202,7 +1202,7 @@ class Ipfs
                 'arg' => $hash
             ]
         ]);
-        $output = htmlentities($response->getBody());
+        $output = $response->getBody();
         return $output;
     }
 
@@ -1551,7 +1551,7 @@ class Ipfs
                 'arg2' => $message
             ]
         ]);
-        $output = htmlentities($response->getBody());
+        $output = $response->getBody();
         return $output;
     }
 
@@ -1872,7 +1872,7 @@ class Ipfs
                 'arg' => $tarHash
             ]
         ]);
-        $output = htmlentities($response->getBody());
+        $output = $response->getBody();
         return $output;
     }
 
@@ -1887,7 +1887,7 @@ class Ipfs
     {
         $client = self::setClient();
         $response = $client->request('POST', 'tour/list');
-        $output = htmlentities($response->getBody());
+        $output = $response->getBody();
         return $output;
     }
 
@@ -1902,7 +1902,7 @@ class Ipfs
     {
         $client = self::setClient();
         $response = $client->request('POST', 'tour/next');
-        $output = htmlentities($response->getBody());
+        $output = $response->getBody();
         return $output;
     }
 
@@ -1917,7 +1917,7 @@ class Ipfs
     {
         $client = self::setClient();
         $response = $client->request('POST', 'tour/restart');
-        $output = htmlentities($response->getBody());
+        $output = $response->getBody();
         return $output;
     }
 
@@ -1959,4 +1959,3 @@ class Ipfs
         return self::getReturnContent($response->getBody()->getContents());
     }
 }
-?>
